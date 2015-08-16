@@ -10,11 +10,10 @@ Loading and preprocessing the data
         
 Loading the data
 
-```{r Loading, echo = TRUE}
 
+```r
 unzip("./activity.zip")
 mydata <- read.csv("./activity.csv", colClasses = c("integer","Date","integer"))
-
 ```
 
 Total number of steps per day
@@ -22,16 +21,15 @@ Total number of steps per day
 
 Subsetting the data excluding missing (NA) values
 
-```{r ExcudingNA, echo = TRUE}
 
+```r
 Newdata <- mydata[complete.cases(mydata),]
-
 ```
 
 Computing total steps taken each day
 
-```{r StepsEachDay, echo = TRUE}
 
+```r
 library(dplyr)
 
 Newdata <- tbl_df(Newdata)
@@ -42,8 +40,8 @@ DlyNonNASteps <- Newdata %>%
 
 Plotting Histogram for steps each day
 
-```{r PlotHistogram, echo = TRUE}
 
+```r
 hist(DlyNonNASteps$stepsTaken,
 	breaks = 5, 
 	col = "blue",
@@ -51,20 +49,20 @@ hist(DlyNonNASteps$stepsTaken,
 	main = "Steps Each Day",
 	xlab = "Total number of steps",
 	ylab = "Number of days")
-
 ```
+
+![plot of chunk PlotHistogram](figure/PlotHistogram-1.png) 
 
 Computing Mean & Median of total steps taken each day
 
-```{r CentralMeasuresOfStepsEachDay, echo = TRUE}
 
+```r
 MeanNonNAStepsPerDay <- mean(DlyNonNASteps$stepsTaken)  
 MedianNonNAStepsPerDay <- median(DlyNonNASteps$stepsTaken)
-
 ```
 
-The mean steps per day is `r MeanNonNAStepsPerDay`.  
-The median steps per day is `r MedianNonNAStepsPerDay`.
+The mean steps per day is 1.0766189 &times; 10<sup>4</sup>.  
+The median steps per day is 10765.
 
 
 Average daily activity pattern
@@ -73,7 +71,8 @@ Average daily activity pattern
 Making a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) 
 and the average number of steps taken, averaged across all days (y-axis)
 
-```{r TimeSeriesPlot, echo = TRUE}
+
+```r
 Newdata <- tbl_df(mydata)
 DlySteps <- Newdata %>%
 			group_by(interval) %>%
@@ -85,15 +84,16 @@ plot(DlySteps$interval, DlySteps$stepsTaken,
 	main = "5-minute interval against Average steps taken")
 ```
 
+![plot of chunk TimeSeriesPlot](figure/TimeSeriesPlot-1.png) 
+
 Interval with maximum average daily steps
 
-```{r IntervalMaxSteps, echo = TRUE}
 
+```r
 MaxInt <- DlySteps[which.max(DlySteps$stepsTaken),1]
-
 ```
 
-5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps is `r MaxInt`.
+5-minute interval, on average across all the days in the dataset, which contains the maximum number of steps is 835.
 
 
 Imputing missing values
@@ -101,34 +101,33 @@ Imputing missing values
 
 Counting missing values in the dataset
 
-```{r CountNA, echo = TRUE}
+
+```r
 NArows <- nrow(mydata[is.na(mydata),])
 ```
-Total no of missing (NA) values in the dataset is `r NArows`.
+Total no of missing (NA) values in the dataset is 2304.
 
 
 Strategy to replace missing values
 
-```{r MissingValueStrategy, echo = TRUE}
 
+```r
 intervals <- group_by(Newdata, interval)
 Newdata <- mutate(intervals, meansteps = mean(steps, na.rm = TRUE))
-
 ```
 
 Creating new dataset after replacing the missing values with the average of their intervals
 
-```{r ReplacingNA, echo = TRUE}
 
+```r
 Newdata[is.na(Newdata[,1]),1] <- Newdata[is.na(Newdata[,1]),4]
 NonNAData <- Newdata[,c(1:3)]
-
 ```
 
 Plotting histgrom with the new data with replaced missing values
 
-```{r Histogram, echo = TRUE}
 
+```r
 DlySteps <- NonNAData %>%
 			group_by(date) %>%
 			summarize(stepsTaken = sum(steps, na.rm = TRUE))
@@ -140,25 +139,28 @@ hist(DlySteps$stepsTaken,
 	main = "Steps Each Day",
 	xlab = "Total number of steps",
 	ylab = "Number of days")
+```
 
+![plot of chunk Histogram](figure/Histogram-1.png) 
+
+```r
 MeanStepsPerDay <- mean(DlySteps$stepsTaken)
 MedianStepsPerDay <- median(DlySteps$stepsTaken)
 
 TotalStepsDiff <- sum(DlySteps$stepsTaken) - sum(DlyNonNASteps$stepsTaken)
 TotalMeanStepsDiff <- MeanStepsPerDay - MeanNonNAStepsPerDay
 TotalMedianStepsDiff <- MedianStepsPerDay - MedianNonNAStepsPerDay
-
 ```
 
-The mean steps per day after replacing NA with the average of their interval is `r MeanStepsPerDay`.  
-The median steps per day after replacing NA with the average of their interval is `r MedianStepsPerDay`.  
+The mean steps per day after replacing NA with the average of their interval is 1.0766189 &times; 10<sup>4</sup>.  
+The median steps per day after replacing NA with the average of their interval is 1.0766189 &times; 10<sup>4</sup>.  
 
-The estimate for the mean steps per day in the first part of the assignment was `r MeanNonNAStepsPerDay`.  
-The estimate for the median steps per day in the first part of the assignment was `r MedianNonNAStepsPerDay`.  
+The estimate for the mean steps per day in the first part of the assignment was 1.0766189 &times; 10<sup>4</sup>.  
+The estimate for the median steps per day in the first part of the assignment was 10765.  
 
-The difference between Estimated Total steps & Actual Total steps is `r TotalStepsDiff`.  
-The difference between mean of Estimated Total steps & mean of Actual Total steps is `r TotalMeanStepsDiff`.  
-The difference between median of Estimated Total steps & median of Actual Total steps is `r TotalMedianStepsDiff`.  
+The difference between Estimated Total steps & Actual Total steps is 8.6129509 &times; 10<sup>4</sup>.  
+The difference between mean of Estimated Total steps & mean of Actual Total steps is 0.  
+The difference between median of Estimated Total steps & median of Actual Total steps is 1.1886792.  
 
 
 Differences in activity patterns between weekdays and weekends
@@ -166,8 +168,8 @@ Differences in activity patterns between weekdays and weekends
 
 Creating a weekday & Weekend tag basis the date
 
-```{r DayTag, echo = TRUE}
 
+```r
 NonNAData <- mutate(NonNAData, DayOfWeek = weekdays(date))
 
 Wdays = c('Monday', 'Tuesday', 'Wednesday', 'Thursday' , 'Friday')
@@ -175,13 +177,12 @@ Wdays = c('Monday', 'Tuesday', 'Wednesday', 'Thursday' , 'Friday')
 NonNAData <- mutate(NonNAData, 
 				DayTag = factor((DayOfWeek %in% Wdays)+1L, 
 								levels = 1:2, labels = c('Weekend','Weekday')))
-
 ```
 
 Making a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 
-```{r TimeSeriesPanelPlot, echo = TRUE}
 
+```r
 AvgSteps <- NonNAData %>%
 		group_by(interval,DayTag) %>%
 		summarize(stepsTaken = mean(steps, na.rm = TRUE))
@@ -189,5 +190,6 @@ AvgSteps <- NonNAData %>%
 library(ggplot2)
 
 qplot(interval,stepsTaken, data = AvgSteps, geom = "line", facets = DayTag~.)
-
 ```
+
+![plot of chunk TimeSeriesPanelPlot](figure/TimeSeriesPanelPlot-1.png) 
